@@ -25,7 +25,7 @@ class HarvestItemGetterable(type):
 
 
 class HarvestItemBase(object):
-    def __init__( self, harvest, data ):
+    def __init__( self, harvest, data={}):
         self.harvest = harvest
         for key,value in data.items():
             key = key.replace('-','_').replace(' ','_')
@@ -259,14 +259,19 @@ class Harvest(object):
         for element in self._get_element_values( url, 'day-entry' ):
             yield Entry( self, element )
 
-    def _request(self,url):
-        request = urllib2.Request( url=self.uri+url, headers=self.headers )
+    def _request(self,url,data=None):
+        if data:
+            request = urllib2.Request( url=self.uri+url, data=data, headers=self.headers)
+        else:
+            request = urllib2.Request( url=self.uri+url, headers=self.headers )
+
         try:
             r = urllib2.urlopen(request)
             xml = r.read()
-            return parseString( xml )
+            return parseString(xml)
         except urllib2.URLError:
-            raise HarvestConnectionError()
+            raise
+            #raise HarvestConnectionError()
 
     def _get_element_values(self,url,tagname):
         def get_element(element):
